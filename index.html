@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>婚禮輪播影片 - 專屬播放器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    /* 影片全螢幕覆蓋並保持比例 */
+    #bg-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+      z-index: 1;
+    }
+    /* 隱藏 YouTube 播放器 */
+    #yt-player {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* 啟動遮罩（瀏覽器限制必須由使用者點擊才能播放聲音） */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.5s;
+    }
+    #overlay h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+    #overlay p {
+      font-size: 16px;
+      color: #ddd;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      padding: 10px 24px;
+      border-radius: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="overlay" onclick="startPlayback()">
+    <h1>點擊螢幕開始輪播</h1>
+    <p>🎵 配樂：Henry Moodie - you were there for me</p>
+  </div>
+
+  <video id="bg-video" autoplay loop muted playsinline>
+    <source src="未命名專案.mp4" type="video/mp4">
+    您的瀏覽器不支援 Video 標籤。
+  </video>
+
+  <div id="yt-player"></div>
+
+  <script>
+    // 載入 YouTube IFrame API
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('yt-player', {
+        height: '100',
+        width: '100',
+        videoId: '65ZRPTcxkWk', // Henry Moodie - you were there for me
+        playerVars: {
+          'autoplay': 0,
+          'loop': 1,
+          'playlist': '65ZRPTcxkWk', // YouTube 循環播放必須帶上 playlist 參數
+          'controls': 0
+        },
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+
+    var isReady = false;
+    function onPlayerReady(event) {
+      isReady = true;
+    }
+
+    // 解決現代瀏覽器不允許網頁在無使用者操作下自動播放聲音的機制
+    function startPlayback() {
+      var overlay = document.getElementById('overlay');
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.style.display = 'none', 500);
+
+      // 啟動影片
+      var video = document.getElementById('bg-video');
+      video.play();
+
+      // 啟動 YouTube 音樂
+      if (player && player.playVideo) {
+        player.playVideo();
+      }
+    }
+  </script>
+</body>
+</html>
